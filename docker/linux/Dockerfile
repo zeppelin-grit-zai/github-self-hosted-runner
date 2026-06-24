@@ -9,11 +9,19 @@ RUN apt update -y && apt upgrade -y && rm -rf /var/lib/apt/lists/*
 # Add a user named docker
 RUN useradd -m docker
 
-# Install necessary packages
-RUN apt-get update && apt install -y --no-install-recommends \
-    curl git build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip jq \
-    sudo docker.io \
-    && apt-get -yqq install ssh \
+# Install necessary packages, GitHub CLI, and Docker CLI
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl gnupg \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    build-essential docker-buildx-plugin docker-ce-cli docker-compose-plugin gh git jq libffi-dev libssl-dev \
+    python3 python3-dev python3-pip python3-venv ssh sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Add docker user to docker group and allow GID fix at startup
