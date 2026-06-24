@@ -3,7 +3,7 @@ name: Publish Linux Image
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 permissions:
   contents: read
